@@ -1,18 +1,23 @@
+import { IPostCardProp } from "@/types/types";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
-const PostCard = () => {
+const PostCard = ({ post }: { post: IPostCardProp }) => {
   return (
     <div className="w-96 flex flex-col p-3 shadow-3xl border-2 border-black/50 rounded-xl">
       <div>
-        <span className="font-bold">Post Title</span>
+        <span className="font-bold">{post.title}</span>
       </div>
       <div>
-        <span>here is post content present please have a look</span>
+        <span>{post.content}</span>
       </div>
-      <div className="flex justify-end items-center mt-4">
-        <Button className="bg-purple-500 hover:bg-purple-600 text-white">
-          Read
-        </Button>
+      <div className="flex justify-between items-center mt-4">
+        <span className="px-3 py-0.5 text-sm rounded-2xl bg-gray-700 text-white">{post.tag.name}</span>
+        <Link href={`/blog/${post.id}`}>
+          <Button className="bg-purple-500 hover:bg-purple-600 cursor-pointer text-white">
+            Read
+          </Button>
+        </Link>
       </div>
     </div>
   );

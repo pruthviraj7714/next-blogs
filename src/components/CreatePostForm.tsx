@@ -23,6 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import axios from 'axios';
+import { Tag } from "@prisma/client";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters" }),
@@ -40,8 +44,35 @@ export default function CreatePostForm() {
     },
   });
 
+  const { data : dataTags, isLoading : isLoadingTags, error } = useQuery<Tag[]>({
+    queryKey : ['tags'],
+    queryFn : async () => {
+      const response = await axios.get('/api/tags');
+      return response.data.tags;
+    } 
+  })
+
+  console.log(dataTags);
+  
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+  }
+
+  if(isLoadingTags) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <Loader2 className="animate-spin" />
+      </div>
+    )
+  }
+
+  if(error) {
+    return (
+      <div className="text-red-500 flex min-h-screen justify-center items-center">
+        Error while fetching Tags
+      </div>
+    )
   }
 
   return (
@@ -92,11 +123,9 @@ export default function CreatePostForm() {
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>Tags</SelectLabel>
-                        <SelectItem value="javascript">Javascript</SelectItem>
-                        <SelectItem value="python">Python</SelectItem>
-                        <SelectItem value="rust">Rust</SelectItem>
-                        <SelectItem value="go">Go</SelectItem>
-                        <SelectItem value="swift">Swift</SelectItem>
+                        {dataTags && dataTags?.length > 0 && dataTags?.map((t : Tag) => (
+                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
