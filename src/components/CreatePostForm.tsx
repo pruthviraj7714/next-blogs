@@ -24,19 +24,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
-import axios from 'axios';
+import axios from "axios";
 import { Tag } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 
-const formSchema = z.object({
+export const PostFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters" }),
   content: z.string(),
   tag: z.string().min(1, { message: "Please select a tag" }),
 });
 
-export default function CreatePostForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+export default function CreatePostForm({
+  handleCreatePost,
+  isEditing,
+}: {
+  handleCreatePost: (props : z.infer<typeof PostFormSchema>) => void;
+  isEditing: boolean;
+}) {
+  const form = useForm<z.infer<typeof PostFormSchema>>({
+    resolver: zodResolver(PostFormSchema),
     defaultValues: {
       title: "",
       content: "",
@@ -44,35 +50,38 @@ export default function CreatePostForm() {
     },
   });
 
-  const { data : dataTags, isLoading : isLoadingTags, error } = useQuery<Tag[]>({
-    queryKey : ['tags'],
-    queryFn : async () => {
-      const response = await axios.get('/api/tags');
+  const {
+    data: dataTags,
+    isLoading: isLoadingTags,
+    error,
+  } = useQuery<Tag[]>({
+    queryKey: ["tags"],
+    queryFn: async () => {
+      const response = await axios.get("/api/tags");
       return response.data.tags;
-    } 
-  })
+    },
+  });
 
   console.log(dataTags);
-  
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  function onSubmit(values: z.infer<typeof PostFormSchema>) {
+    handleCreatePost(values);
   }
 
-  if(isLoadingTags) {
+  if (isLoadingTags) {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <Loader2 className="animate-spin" />
       </div>
-    )
+    );
   }
 
-  if(error) {
+  if (error) {
     return (
       <div className="text-red-500 flex min-h-screen justify-center items-center">
         Error while fetching Tags
       </div>
-    )
+    );
   }
 
   return (
@@ -116,16 +125,23 @@ export default function CreatePostForm() {
               <FormItem>
                 <FormLabel>Tag</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Select a Tag" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>Tags</SelectLabel>
-                        {dataTags && dataTags?.length > 0 && dataTags?.map((t : Tag) => (
-                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                        ))}
+                        {dataTags &&
+                          dataTags?.length > 0 &&
+                          dataTags?.map((t: Tag) => (
+                            <SelectItem key={t.id} value={t.id}>
+                              {t.name}
+                            </SelectItem>
+                          ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>

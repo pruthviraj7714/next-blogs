@@ -9,7 +9,7 @@ const PostCard = ({ post }: { post: IPostCardProp }) => {
         <span className="font-bold">{post.title}</span>
       </div>
       <div>
-        <span>{post.content}</span>
+        <span>{post.content.length > 37 ? post.content.substring(0, 37) + "..." : post.content}</span>
       </div>
       <div className="flex justify-between items-center mt-4">
         <span className="px-3 py-0.5 text-sm rounded-2xl bg-gray-700 text-white">{post.tag.name}</span>
